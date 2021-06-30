@@ -26,15 +26,15 @@ def build_net(x_train, y_train):
     inputs = keras.Input(shape=(13,))
 
     x = normalizer(inputs)
-    x = keras.layers.Dense(100, activation="sigmoid")(inputs)
-    x = keras.layers.Dense(50, activation="sigmoid")(x)
+    x = keras.layers.Dense(80, activation="sigmoid")(x)
+    x = keras.layers.Dense(80, activation="sigmoid")(x)
     
     outputs = keras.layers.Dense(1)(x)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer='rmsprop', loss='mse')
 
-    model.fit(x_train, y_train, batch_size=16, epochs=100)
+    model.fit(x_train, y_train, batch_size=32, epochs=100)
 
     return model
 
@@ -60,5 +60,8 @@ if __name__ == "__main__":
 
     folds = KFold(n_splits=5, shuffle=True, random_state=0)
 
-    for mse in map(lambda f: handle_fold(x, y, f[0], f[1]), folds.split(x, y)):
-        print(f'fold MSE -> {mse:.4f}')
+    results = [mse for mse in map(lambda f: handle_fold(x, y, f[0], f[1]), folds.split(x, y))]
+    for idx, mse in enumerate(results):
+        print(f'fold {idx} MSE -> {mse:.4f}')
+    
+    print(f'mean MSE = {np.mean(results):.4f}; std MSE = {np.std(results):.4f}')
