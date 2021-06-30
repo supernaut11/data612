@@ -23,7 +23,7 @@ def build_net(x_train, y_train):
     normalizer = Normalization()
     normalizer.adapt(x_train)
 
-    inputs = keras.Input(shape=(13,))
+    inputs = keras.Input(shape=(x_train.shape[1],))
 
     x = normalizer(inputs)
     x = keras.layers.Dense(80, activation="sigmoid")(x)
