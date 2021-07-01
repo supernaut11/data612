@@ -47,7 +47,7 @@ def build_net(x_train, y_train):
     
     # Compile the network and fit it to the training data
     model.compile(optimizer='adam', loss='mse')
-    model.fit(x_train, y_train, batch_size=64, epochs=100)
+    model.fit(x_train, y_train, batch_size=32, epochs=100)
 
     return model
 
