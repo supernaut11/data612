@@ -1,6 +1,6 @@
 # Assignment 1 Instructions
 
-To execute the provided Python script, simply execute `python assignment1.py`.
+To execute the provided Python script, simply execute `python assignment1.py`. The MSE mean and standard deviation will be printed once all k-fold splits have been trained and evaluated. You should receive a result similar to `MSE mean= 13.1068` and `MSE standard deviation = 3.9651`.
 
 Some restrictions:
   * The script depends on the file `housing.csv` existing in the current working directory when the script is executed.
