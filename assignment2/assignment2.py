@@ -1,6 +1,9 @@
 import numpy as np
+np.random.seed(42)
+
 from sklearn.metrics import accuracy_score
 import tensorflow as tf
+tf.random.set_seed(42)
 from tensorflow import keras
 from tensorflow.keras.datasets.imdb import load_data
 from tensorflow.keras.layers import Embedding, Flatten, Conv1D, MaxPooling1D
@@ -48,8 +51,6 @@ def build_net(x_train, y_train):
     return model
 
 if __name__ == "__main__":
-    tf.random.set_seed(42)
-
     (x_train, y_train), (x_test, y_test) = get_data()
 
     y_train = np.array(y_train)
