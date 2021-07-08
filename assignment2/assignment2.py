@@ -23,8 +23,8 @@ def build_net(x_train, y_train, n):
     return model
 
 # Load data such that we index words from 0 and assign out-of-vocab token outside of core
-# vocabulary range. This eases debugging and deals with Keras's odd behavior of treating 
-# 'index_from' (3 by default) as zero, but the Embedding layer wanting _actual_ zeros.
+# vocabulary range. This deals with Keras's odd behavior of treating both 0 _and_ 'index_from'
+# (3 by default) as zero, but the Embedding layer wanting only _actual_ zeros.
 print('downloading data...')
 (x_train, y_train), (x_test, y_test) = load_data(num_words=MAX_WORDS_BOUND,
                                                  oov_char=MAX_WORDS_BOUND,
