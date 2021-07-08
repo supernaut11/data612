@@ -6,9 +6,9 @@ from tensorflow import keras
 from tensorflow.keras.datasets.imdb import load_data
 from tensorflow.keras.layers import Embedding, Flatten, Conv1D, MaxPooling1D
 
-# Setting n=5003 accounts for the 5000 top tokens, plus the out-of-vocabulary char (5001), 
-# plus the padding char (5002), plus additional offset of 1 per Embedding API docs
-def build_net(x_train, y_train, n=5003):
+MAX_WORDS_BOUND = 5001
+
+def build_net(x_train, y_train, n):
     inputs = keras.Input(shape=(x_train.shape[1],))
     x = Embedding(n, 8, mask_zero=True, input_length=x_train.shape[1])(inputs)
     x = Conv1D(4, 2)(x)
@@ -22,22 +22,32 @@ def build_net(x_train, y_train, n=5003):
 
     return model
 
+# Load data such that we index words from 0 and assign out-of-vocab token outside of core
+# vocabulary range. This eases debugging and deals with Keras's odd behavior of treating 
+# 'index_from' (3 by default) as zero, but the Embedding layer wanting _actual_ zeros.
 print('downloading data...')
-# num_words = 5003 so that we get the top 5000 most frequent words. Without doing this,
-# the start_char (1) and the oov_char (2) from load_data prevent us from getting 5000 tokens
-(x_train, y_train), (x_test, y_test) = load_data(num_words=5003)
+(x_train, y_train), (x_test, y_test) = load_data(num_words=MAX_WORDS_BOUND,
+                                                 oov_char=MAX_WORDS_BOUND,
+                                                 index_from=0)
+
+# Drop the first value in training data, it's just the start token and isn't useful here
+x_train = [xi[1:] for xi in x_train]
+x_test = [xi[1:] for xi in x_test]
+
 y_train = np.array(y_train)
 y_test = np.array(y_test)
 
+# Pad any rows that are shorter than the longest review with 0's
 print('padding data to maximum review length...')
 cols = range(max(max(len(x) for x in x_train), max(len(x) for x in x_test)))
-x_train = pd.DataFrame([xi[1:] for xi in x_train]).reindex(columns=cols).fillna(value=0)
-x_test = pd.DataFrame([xi[1:] for xi in x_test]).reindex(columns=cols).fillna(value=0)
+x_train = pd.DataFrame(x_train).reindex(columns=cols).fillna(value=0).astype(np.int32)
+x_test = pd.DataFrame(x_test).reindex(columns=cols).fillna(value=0).astype(np.int32)
 
 print('building model...')
-model = build_net(x_train, y_train)
+model = build_net(x_train, y_train, MAX_WORDS_BOUND + 1)
 model.summary()
 
+# Use output of sigmoid to make classification decision
 print(f'making predictions on test set...')
 y_predict = tf.math.greater(model.predict(x_test), 0.5)
 
