@@ -6,7 +6,9 @@ from tensorflow import keras
 from tensorflow.keras.datasets.imdb import load_data
 from tensorflow.keras.layers import Embedding, Flatten, Conv1D, MaxPooling1D
 
-def build_net(x_train, y_train, n=5001):
+# Setting n=5003 accounts for the 5000 top tokens, plus the out-of-vocabulary char (5001), 
+# plus the padding char (5002), plus additional offset of 1 per Embedding API docs
+def build_net(x_train, y_train, n=5003):
     inputs = keras.Input(shape=(x_train.shape[1],))
     x = Embedding(n, 8, mask_zero=True, input_length=x_train.shape[1])(inputs)
     x = Conv1D(4, 2)(x)
@@ -21,7 +23,9 @@ def build_net(x_train, y_train, n=5001):
     return model
 
 print('downloading data...')
-(x_train, y_train), (x_test, y_test) = load_data(num_words=5000)
+# num_words = 5003 so that we get the top 5000 most frequent words. Without doing this,
+# the start_char (1) and the oov_char (2) from load_data prevent us from getting 5000 tokens
+(x_train, y_train), (x_test, y_test) = load_data(num_words=5003)
 y_train = np.array(y_train)
 y_test = np.array(y_test)
 
