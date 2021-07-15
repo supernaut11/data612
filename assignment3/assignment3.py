@@ -1,24 +1,17 @@
 import numpy as np
-import pandas as pd
 from string import ascii_uppercase
 from tensorflow import keras
 from tensorflow.keras.layers import Input, LSTM, Dense
 from tensorflow.keras.utils import to_categorical
 
-np.random.seed(42)
+ALPHA_TO_NUM = {alpha: idx for idx, alpha in enumerate(ascii_uppercase)}
+NUM_TO_ALPHA = {idx: alpha for idx, alpha in enumerate(ascii_uppercase)}
 
-ALPHABET = ascii_uppercase
-ALPHA_TO_NUM = {alpha: idx for idx, alpha in enumerate(ALPHABET)}
-NUM_TO_ALPHA = {idx: alpha for idx, alpha in enumerate(ALPHABET)}
+def create_dataset(vals, win_size):
+    dataset = [(tuple(vals[i:i+win_size]), vals[i+win_size]) for i in range(len(vals) - win_size)]
+    dataset = list(zip(*dataset))
 
-def create_dataset(val_mapping, window_size):
-    dataset = {}
-    keys = [k for k in val_mapping.keys()]
-    
-    for idx in range(len(val_mapping) - window_size):
-        dataset[tuple(keys[idx:idx+window_size])] = idx + window_size
-
-    return tuple(dataset.keys()), tuple(dataset.values())
+    return dataset[0], dataset[1]
 
 def build_net(x_train, y_train):
     inputs = Input(shape=(x_train.shape[1], x_train.shape[2]))
@@ -27,21 +20,21 @@ def build_net(x_train, y_train):
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
-    model.fit(x_train, y_train, batch_size=1, epochs=500)
+    model.fit(x_train, y_train, batch_size=1, epochs=250)
 
     return model
 
-def main():
-    window_size = 1
-    x, y = create_dataset(NUM_TO_ALPHA, window_size)
-    x = np.reshape(x, (len(x), window_size, 1)) / float(len(x))
-    y = to_categorical(y)
+window_size = 3
+x, y = create_dataset(sorted(NUM_TO_ALPHA.keys()), window_size)
 
-    model = build_net(x, y)
-    model.summary()
+x_win = np.reshape(x, (len(x), window_size, 1)) / float(len(x))
+y_win = to_categorical(y)
+model = build_net(x_win, y_win)
+model.summary()
 
-    scores = model.evaluate(x, y)
-    print(f"accuracy = {scores[1]*100:.2f}%")
+scores = model.evaluate(x_win, y_win)
+print(f"accuracy = {scores[1]*100:.2f}%")
 
-if __name__ == "__main__":
-    main()
+y_predict = model.predict(x_win)
+for idx, pred in enumerate(y_predict):
+    print([NUM_TO_ALPHA[xi] for xi in x[idx]], 'prediction: ', NUM_TO_ALPHA[np.argmax(pred)])
