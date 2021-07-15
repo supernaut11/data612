@@ -8,7 +8,7 @@ ALPHA_TO_NUM = {alpha: idx for idx, alpha in enumerate(ascii_uppercase)}
 NUM_TO_ALPHA = {idx: alpha for idx, alpha in enumerate(ascii_uppercase)}
 
 def create_dataset(vals, window):
-    return zip(*[(tuple(vals[i:i+window]), vals[i+window]) for i in range(len(vals) - window)])
+    return zip(*[(vals[i:i+window], vals[i+window]) for i in range(len(vals) - window)])
 
 def build_net(x_train, y_train):
     inputs = Input(shape=(x_train.shape[1], x_train.shape[2]))
@@ -30,8 +30,9 @@ model = build_net(x_win, y_win)
 model.summary()
 
 scores = model.evaluate(x_win, y_win)
-print(f"accuracy = {scores[1]*100:.2f}%")
+print(f"model accuracy = {scores[1]*100:.2f}%")
 
+print(f"sample predictions:")
 y_predict = model.predict(x_win)
 for idx, pred in enumerate(y_predict):
-    print([NUM_TO_ALPHA[xi] for xi in x[idx]], 'prediction: ', NUM_TO_ALPHA[np.argmax(pred)])
+    print([NUM_TO_ALPHA[xi] for xi in x[idx]], 'prediction:', NUM_TO_ALPHA[np.argmax(pred)])
