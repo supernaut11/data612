@@ -7,11 +7,8 @@ from tensorflow.keras.utils import to_categorical
 ALPHA_TO_NUM = {alpha: idx for idx, alpha in enumerate(ascii_uppercase)}
 NUM_TO_ALPHA = {idx: alpha for idx, alpha in enumerate(ascii_uppercase)}
 
-def create_dataset(vals, win_size):
-    dataset = [(tuple(vals[i:i+win_size]), vals[i+win_size]) for i in range(len(vals) - win_size)]
-    dataset = list(zip(*dataset))
-
-    return dataset[0], dataset[1]
+def create_dataset(vals, window):
+    return zip(*[(tuple(vals[i:i+window]), vals[i+window]) for i in range(len(vals) - window)])
 
 def build_net(x_train, y_train):
     inputs = Input(shape=(x_train.shape[1], x_train.shape[2]))
