@@ -12,16 +12,16 @@ def create_dataset(vals, window):
 
 def build_net(x_train, y_train):
     inputs = Input(shape=(x_train.shape[1], x_train.shape[2]))
-    x = LSTM(32, input_shape=(x_train.shape[1], x_train.shape[2]))(inputs)
+    x = LSTM(50, input_shape=(x_train.shape[1], x_train.shape[2]))(inputs)
     outputs = Dense(y_train.shape[1], activation="softmax")(x)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
-    model.fit(x_train, y_train, batch_size=1, epochs=250)
+    model.fit(x_train, y_train, batch_size=1, epochs=500)
 
     return model
 
-window_size = 3
+window_size = 1
 x, y = create_dataset(sorted(NUM_TO_ALPHA.keys()), window_size)
 
 x_win = np.reshape(x, (len(x), window_size, 1)) / float(len(x))
